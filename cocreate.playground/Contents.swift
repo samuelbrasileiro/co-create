@@ -99,8 +99,6 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
 
         let annotation = MKPointAnnotation()
         annotation.coordinate = recifeCoordinates
-        annotation.title = "Hellcife"
-        annotation.subtitle = "O centro de Recife é aqui"
         
         mapView.addAnnotation(annotation)
         
@@ -127,24 +125,28 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         if annotationView == nil{
             annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "AnnotationView")
         }
-        if annotation.title == "Hellcife"{
-            print("alaoe")
-            annotationView?.contentMode = .scaleToFill
-            annotationView?.image = UIImage(imageLiteralResourceName: "mark")
-        }
-        annotationView?.canShowCallout = true
+        
+        annotationView?.contentMode = .scaleToFill
+        annotationView?.image = UIImage(imageLiteralResourceName: "mark@3x")
+        annotationView?.frame.size = CGSize(width: 132, height: 90)
+    
+        annotationView?.canShowCallout = false
         return annotationView
     }
     public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        
-            UIView.animate(withDuration: 2.0, delay: 0, options: [], animations: {
-                if view.frame.origin.x == 0{
-                view.frame = CGRect(x: -20, y: -10, width: view.frame.width + 20, height: view.frame.height + 20)
-                }
-                else{
-                    view.frame = CGRect(x: 0, y: 0, width: view.frame.width - 20, height: view.frame.height - 20)
-                }
-            })
+        print(view.frame)
+        UIView.animate(withDuration: 0.2, delay: 0, options: [], animations: {
+            
+            if view.frame.width == 132{
+                view.frame = CGRect(x: view.frame.origin.x - 60, y: view.frame.origin.y - 40, width: view.frame.width + 60, height: view.frame.height + 40)
+            }
+            else{
+                view.frame = CGRect(x: view.frame.origin.x + 60, y: view.frame.origin.y + 40, width: view.frame.width - 60, height: view.frame.height - 40)
+            }
+            
+        })
+                
+            
     }
     
     
