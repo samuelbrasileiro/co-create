@@ -91,6 +91,7 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
 
         let mapRegionSpan = 0.02
         mapRegion.center = recifeCoordinates
+        mapView.showsUserLocation = true
         mapRegion.span.latitudeDelta = mapRegionSpan
         mapRegion.span.longitudeDelta = mapRegionSpan
 
@@ -102,6 +103,8 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         annotation.subtitle = "O centro de Recife é aqui"
         
         mapView.addAnnotation(annotation)
+        
+        
         view.addSubview(orangeTab)
             orangeTab.addSubview(logoBackground)
                 logoBackground.addSubview(label)
@@ -119,9 +122,30 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         vc.preferredContentSize = CGSize(width: 800, height: 600)
         PlaygroundPage.current.liveView = vc
     }
-    //func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?{
-    //    return nil
-    //}
+    public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?{
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "AnnotationView")
+        if annotationView == nil{
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "AnnotationView")
+        }
+        if annotation.title == "Hellcife"{
+            print("alaoe")
+            annotationView?.contentMode = .scaleToFill
+            annotationView?.image = UIImage(imageLiteralResourceName: "mark")
+        }
+        annotationView?.canShowCallout = true
+        return annotationView
+    }
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
+            UIView.animate(withDuration: 2.0, delay: 0, options: [], animations: {
+                if view.frame.origin.x == 0{
+                view.frame = CGRect(x: -20, y: -10, width: view.frame.width + 20, height: view.frame.height + 20)
+                }
+                else{
+                    view.frame = CGRect(x: 0, y: 0, width: view.frame.width - 20, height: view.frame.height - 20)
+                }
+            })
+    }
     
     
 }
