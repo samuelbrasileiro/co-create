@@ -12,7 +12,7 @@ CTFontManagerRegisterFontsForURL(cfURL, CTFontManagerScope.process, nil)
 
 public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocationManagerDelegate{
     
-    let mapView = MKMapView(frame: CGRect(x:0, y:88, width: 800, height:424))
+    let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
     
     var mapRegion = MKCoordinateRegion()
     var locationManager = CLLocationManager()
@@ -37,27 +37,27 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
 //        line.backgroundColor = .lightGray
 //        view.addSubview(line)
         
-        let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 800, height: 88))
+        let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 1024, height: 106))
         orangeTab.backgroundColor = .myOrange
         
-        let logoBackground = UILabel(frame: CGRect(x: 280, y: 15, width: 240, height: 60))
+        let logoBackground = UILabel(frame: CGRect(x: 376, y: 16, width: 273, height: 77))
         logoBackground.backgroundColor = .myLightGrey
         logoBackground.layer.masksToBounds = true
         logoBackground.layer.cornerRadius = 17
         
-        let label = UILabel(frame: CGRect(x: 0, y: -10, width: 240, height: 60))
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 273, height: 77))
         label.font = UIFont(name: "Gilbert Color", size: 80)
         label.textAlignment = .center
         label.adjustsFontSizeToFitWidth = true
         label.text = "co-create"
         
         menuIcon.contentMode = .scaleToFill
-        menuIcon.frame = CGRect(x: 20, y: 20, width: 54, height: 42)
+        menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
         menuIcon.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
         
-        let belowTab = UIView(frame: CGRect(x: 0, y: 512, width: 800, height: 88))
+        let belowTab = UIView(frame: CGRect(x: 0, y: 652, width: 1024, height: 106))
         belowTab.backgroundColor = .myLightGrey
-        let line = UIView(frame: CGRect(x: 0, y: 0, width: 800, height: 1))
+        let line = UIView(frame: CGRect(x: 0, y: 0, width: belowTab.frame.width, height: 1))
         line.backgroundColor = .lightGray
         
         
@@ -117,8 +117,9 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     }
     @objc func presentNext(){
         let vc = MyViewController()
-        vc.preferredContentSize = CGSize(width: 800, height: 600)
-        PlaygroundPage.current.liveView = vc
+
+        navigationController?.pushViewController(vc, animated: true)
+
     }
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?{
         var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "AnnotationView")
@@ -152,11 +153,13 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     
 }
 
+
 let vc = MyViewController()
 
-vc.preferredContentSize = CGSize(width: 800, height: 600)
-
+//vc.preferredContentSize = CGSize(width: 800, height: 600)
+let navigation = UINavigationController(screenType: .ipad, isPortrait: false)
+navigation.pushViewController(vc, animated: false)
 
 PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
 
-PlaygroundPage.current.liveView = vc
+PlaygroundPage.current.liveView = navigation.scale(to: 0.6)

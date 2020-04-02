@@ -47,7 +47,7 @@ public enum ScreenType {
     }
 }
 
-extension UIViewController {
+extension UINavigationController {
 
     public convenience init(screenType: ScreenType, isPortrait: Bool = true) {
         self.init(nibName: nil, bundle: nil)

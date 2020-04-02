@@ -2,5 +2,10 @@
 <Timeline
    version = "3.0">
    <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/samuel/Desktop/Developing/Swift/cocreate/cocreate.playground#CharacterRangeLen=98&amp;CharacterRangeLoc=4692&amp;EndingColumnNumber=0&amp;EndingLineNumber=121&amp;StartingColumnNumber=8&amp;StartingLineNumber=118&amp;Timestamp=607523885.601281"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
    </TimelineItems>
 </Timeline>
