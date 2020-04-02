@@ -27,6 +27,7 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     
     let achievementButton = UIButton()
     override public func loadView() {
+        //navigationController?.navigationBar.isHidden = true
         self.view = UIView()
         view.backgroundColor = .blue
         mapView.delegate = self
@@ -55,7 +56,7 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
         menuIcon.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
         
-        let belowTab = UIView(frame: CGRect(x: 0, y: 652, width: 1024, height: 106))
+        let belowTab = UIView(frame: CGRect(x: 0, y: 662, width: 1024, height: 106))
         belowTab.backgroundColor = .myLightGrey
         let line = UIView(frame: CGRect(x: 0, y: 0, width: belowTab.frame.width, height: 1))
         line.backgroundColor = .lightGray
@@ -104,19 +105,20 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         
         
         view.addSubview(orangeTab)
-            orangeTab.addSubview(logoBackground)
-                logoBackground.addSubview(label)
-            orangeTab.addSubview(menuIcon)
+        orangeTab.addSubview(logoBackground)
+        logoBackground.addSubview(label)
+        orangeTab.addSubview(menuIcon)
         view.addSubview(mapView)
+        
         view.addSubview(belowTab)
-            belowTab.addSubview(line)
-            belowTab.addSubview(cityLabel)
-            belowTab.addSubview(progressBar)
-                progressBar.addSubview(number)
-            belowTab.addSubview(achievementButton)
+        belowTab.addSubview(line)
+        belowTab.addSubview(cityLabel)
+        belowTab.addSubview(progressBar)
+        progressBar.addSubview(number)
+        belowTab.addSubview(achievementButton)
     }
     @objc func presentNext(){
-        let vc = AchievementViewController()
+        let vc = MyViewController(screenType: .ipad)
         //vc.modalPresentationStyle = .fullScreen
         navigationController?.pushViewController(vc, animated: true)
 
@@ -152,14 +154,15 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     
     
 }
+
 class AchievementViewController: UIViewController{
     let returnButton = UIButton()
-    override public func loadView() {
-        self.view = UIView()
+    override func loadView() {
+        let view = UIView()
         view.backgroundColor = .myLightBlue
         let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 1024, height: 106))
         orangeTab.backgroundColor = .myOrange
-        
+        orangeTab.isHidden = false
         let logoBackground = UILabel(frame: CGRect(x: 376, y: 16, width: 273, height: 77))
         logoBackground.backgroundColor = .myLightGrey
         logoBackground.layer.masksToBounds = true
@@ -171,23 +174,18 @@ class AchievementViewController: UIViewController{
         label.adjustsFontSizeToFitWidth = true
         label.text = "Recife"
         
-        returnButton.contentMode = .scaleToFill
-        returnButton.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
-        returnButton.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
-    
-        view.addSubview(orangeTab)
-        orangeTab.addSubview(logoBackground)
-            logoBackground.addSubview(label)
-        orangeTab.addSubview(returnButton)
+        
+        
+        self.view = view
     }
 }
 
-let vc = MyViewController()
+let vc = MyViewController(screenType: .ipad, isPortrait: false)
 
 //vc.preferredContentSize = CGSize(width: 800, height: 600)
 let navigation = UINavigationController(screenType: .ipad, isPortrait: false)
 navigation.pushViewController(vc, animated: false)
 //navigation.navigationBar.isHidden = true
-//PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
+PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
 
-PlaygroundPage.current.liveView = navigation.scale(to: 0.6)
+PlaygroundPage.current.liveView = navigation.scale(to: 0.75)
