@@ -28,7 +28,7 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     let achievementButton = UIButton()
     override public func loadView() {
         self.view = UIView()
-        view.backgroundColor = .white
+        view.backgroundColor = .blue
         mapView.delegate = self
         mapView.contentMode = .scaleAspectFit
         //locationManager.delegate = self
@@ -116,8 +116,8 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
             belowTab.addSubview(achievementButton)
     }
     @objc func presentNext(){
-        let vc = MyViewController()
-
+        let vc = AchievementViewController()
+        //vc.modalPresentationStyle = .fullScreen
         navigationController?.pushViewController(vc, animated: true)
 
     }
@@ -152,14 +152,42 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     
     
 }
-
+class AchievementViewController: UIViewController{
+    let returnButton = UIButton()
+    override public func loadView() {
+        self.view = UIView()
+        view.backgroundColor = .myLightBlue
+        let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 1024, height: 106))
+        orangeTab.backgroundColor = .myOrange
+        
+        let logoBackground = UILabel(frame: CGRect(x: 376, y: 16, width: 273, height: 77))
+        logoBackground.backgroundColor = .myLightGrey
+        logoBackground.layer.masksToBounds = true
+        logoBackground.layer.cornerRadius = 17
+        
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 273, height: 77))
+        label.font = UIFont(name: "Gilbert Color", size: 80)
+        label.textAlignment = .center
+        label.adjustsFontSizeToFitWidth = true
+        label.text = "Recife"
+        
+        returnButton.contentMode = .scaleToFill
+        returnButton.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
+        returnButton.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
+    
+        view.addSubview(orangeTab)
+        orangeTab.addSubview(logoBackground)
+            logoBackground.addSubview(label)
+        orangeTab.addSubview(returnButton)
+    }
+}
 
 let vc = MyViewController()
 
 //vc.preferredContentSize = CGSize(width: 800, height: 600)
 let navigation = UINavigationController(screenType: .ipad, isPortrait: false)
 navigation.pushViewController(vc, animated: false)
-
-PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
+//navigation.navigationBar.isHidden = true
+//PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
 
 PlaygroundPage.current.liveView = navigation.scale(to: 0.6)
