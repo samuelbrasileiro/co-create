@@ -10,7 +10,8 @@ let cfURL = Bundle.main.url(forResource: "Gilbert-Color", withExtension: "otf")!
 CTFontManagerRegisterFontsForURL(cfURL, CTFontManagerScope.process, nil)
 
 
-public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocationManagerDelegate{
+public class MyViewController : UIViewController,  MKMapViewDelegate, UITableViewDelegate, UITableViewDataSource{
+
     
     let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
     
@@ -18,7 +19,8 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
     var locationManager = CLLocationManager()
     
     let menuIcon = UIButton()
-    
+    let menuView = UIView()
+    let menuTableView = UITableView()
     let cityLabel = UILabel()
     
     let progressBar = CircleProgressView()
@@ -52,9 +54,6 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         label.adjustsFontSizeToFitWidth = true
         label.text = "co-create"
         
-        menuIcon.contentMode = .scaleToFill
-        menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
-        menuIcon.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
         
         let belowTab = UIView(frame: CGRect(x: 0, y: 662, width: 1024, height: 106))
         belowTab.backgroundColor = .myLightGrey
@@ -62,14 +61,14 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         line.backgroundColor = .lightGray
         
         
-        cityLabel.frame = CGRect(x: belowTab.frame.width/2 - 140, y: 10, width: 280, height: 60)
-        cityLabel.font = UIFont(name: "Gilbert Color", size: 60)
+        cityLabel.frame = CGRect(x: belowTab.frame.width/2 - 140, y: 20, width: 280, height: 60)
+        cityLabel.font = UIFont(name: "Gilbert Color", size: 80)
         cityLabel.textAlignment = .center
         cityLabel.adjustsFontSizeToFitWidth = true
         
         cityLabel.text = "Recife"
         
-        progressBar.frame = CGRect(x: 15, y: 15, width: 58, height: 58)
+        progressBar.frame = CGRect(x: 15, y: 15, width: 76, height: 76)
         progressBar.centerFillColor = .clear
         progressBar.backgroundColor = .clear
         progressBar.clockwise = true
@@ -78,13 +77,13 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         progressBar.trackWidth = 8
         progressBar.trackFillColor = .myLightBlue
         
-        let number = UILabel(frame: CGRect(x: 10, y: 10, width: 38, height: 40))
-        number.font = UIFont(name: "Gilbert Color", size: 37)
+        let number = UILabel(frame: CGRect(x: 13, y: 10, width: 49, height: 52))
+        number.font = UIFont(name: "Gilbert Color", size: 55)
         number.textAlignment = .center
         number.adjustsFontSizeToFitWidth = true
-        number.text = String(12)
-        
-        achievementButton.frame = CGRect(x: 700, y: 15, width: 54, height: 58)
+        number.text = String(25)
+
+        achievementButton.frame = CGRect(x: 919, y: 10, width: 82, height: 87)
         achievementButton.setImage(UIImage(imageLiteralResourceName: "premio"), for: .normal)
         achievementButton.addTarget(self, action: #selector(presentNext), for:.touchUpInside)
         
@@ -103,7 +102,7 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         
         mapView.addAnnotation(annotation)
         
-        
+        createMenu()
         view.addSubview(orangeTab)
         orangeTab.addSubview(logoBackground)
         logoBackground.addSubview(label)
@@ -116,12 +115,15 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
         belowTab.addSubview(progressBar)
         progressBar.addSubview(number)
         belowTab.addSubview(achievementButton)
+        view.addSubview(menuView)
     }
     @objc func presentNext(){
-        let vc = MyViewController(screenType: .ipad)
+        let vc = AchievementViewController(screenType: .ipad)
         //vc.modalPresentationStyle = .fullScreen
         navigationController?.pushViewController(vc, animated: true)
-
+        self.menuView.frame = CGRect(x: 0, y: 0, width: 0, height: 1024)
+        self.menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
+    
     }
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?{
         var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "AnnotationView")
@@ -146,19 +148,98 @@ public class MyViewController : UIViewController,  MKMapViewDelegate, CLLocation
             else{
                 view.frame = CGRect(x: view.frame.origin.x + 60, y: view.frame.origin.y + 40, width: view.frame.width - 60, height: view.frame.height - 40)
             }
+        })
+    }
+    @objc func openMenu(){
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            
+            if self.menuView.frame.width <= 1{
+                self.menuView.frame = CGRect(x: 0, y: 0, width: 240, height: self.view.frame.height)
+                self.menuIcon.frame = CGRect(x: self.menuView.frame.width + 30, y: 30, width: 54, height: 42)
+                self.menuTableView.frame = CGRect(x: 0, y: 106, width: 240, height: 4 * 60)
+            }
+            else{
+                self.menuView.frame = CGRect(x: 0, y: 0, width: 0, height: self.view.frame.height)
+                self.menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
+                self.menuTableView.frame = CGRect(x: 0, y: 106, width: 0, height: 4 * 60)
+            }
+        }, completion: {(_) in
             
         })
-                
-            
+    }
+    
+    func createMenu(){
+        menuIcon.contentMode = .scaleToFill
+        menuIcon.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
+        menuIcon.setImage(UIImage(imageLiteralResourceName: "icons-menu.png"), for: .normal)
+        menuIcon.addTarget(self, action: #selector(openMenu), for: .touchUpInside)
+        
+        menuView.frame = CGRect(x: 0, y: 0, width: 0, height: 1024)
+        menuView.backgroundColor = .myLightBlue
+        
+        menuTableView.frame = CGRect(x: 0, y: 107, width: 240, height: 4 * 60)
+        menuTableView.register(MenuTableViewCell.self, forCellReuseIdentifier: "MenuTableViewCell")
+        menuTableView.delegate = self
+        menuTableView.dataSource = self
+        menuTableView.isScrollEnabled = false
+        menuTableView.reloadData()
+        menuTableView.backgroundColor = .clear
+        menuView.addSubview(menuTableView)
+        
+        menuTableView.frame = CGRect(x: 0, y: 107, width: 0, height: 4 * 60)
+    }
+    
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 4
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
+    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 1
+    }
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        print("here")
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MenuTableViewCell", for: indexPath) as? MenuTableViewCell else {
+            fatalError("The dequeued cell is not an instance of MenuTableViewCell.")
+        }
+        print("here")
+        cell.iconView.image = UIImage(imageLiteralResourceName: "premio")
+        cell.backgroundColor = .clear
+        cell.titleLabel.text = "index " + String(indexPath.row)
+        
+        return cell
+    }
+    
+}
+class MenuTableViewCell: UITableViewCell{
+    let iconView = UIImageView()
+    let titleLabel = UILabel()
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.frame = CGRect(x: 0, y: 0, width: 240, height: 60)
+        iconView.frame = CGRect(x: 10, y: 10, width: 40, height: 40)
+        iconView.layer.masksToBounds = true
+        iconView.layer.cornerRadius = iconView.frame.width/2
+        titleLabel.frame = CGRect(x: 60, y: 10, width: 180, height: 40)
+        titleLabel.font = UIFont(name: "Gilbert Bold", size: 30)
+        print(self.iconView.isHidden)
+        self.addSubview(iconView)
+        self.addSubview(titleLabel)
     }
     
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
-
 class AchievementViewController: UIViewController{
     let returnButton = UIButton()
     override func loadView() {
-        let view = UIView()
+        self.view = UIView()
         view.backgroundColor = .myLightBlue
         let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 1024, height: 106))
         orangeTab.backgroundColor = .myOrange
@@ -174,9 +255,22 @@ class AchievementViewController: UIViewController{
         label.adjustsFontSizeToFitWidth = true
         label.text = "Recife"
         
+        let backButton = UIButton()
+        backButton.contentMode = .scaleToFill
+        backButton.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
+        backButton.setImage(UIImage(imageLiteralResourceName: "back.png"), for: .normal)
+        backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         
+        view.addSubview(orangeTab)
+        orangeTab.addSubview(logoBackground)
+        logoBackground.addSubview(label)
+        orangeTab.addSubview(backButton)
+    }
+    
+    @objc func goBack(){
         
-        self.view = view
+        navigationController?.popViewController(animated: true)
+
     }
 }
 
@@ -185,7 +279,7 @@ let vc = MyViewController(screenType: .ipad, isPortrait: false)
 //vc.preferredContentSize = CGSize(width: 800, height: 600)
 let navigation = UINavigationController(screenType: .ipad, isPortrait: false)
 navigation.pushViewController(vc, animated: false)
-//navigation.navigationBar.isHidden = true
+navigation.navigationBar.isHidden = true
 PlaygroundPage.current.needsIndefiniteExecution = true // Sets up the constant running of the playground so that the location can update properly
 
 PlaygroundPage.current.liveView = navigation.scale(to: 0.75)
