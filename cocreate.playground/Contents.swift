@@ -5,7 +5,7 @@ import PlaygroundSupport
 import MapKit
 import CoreLocation
 import XCPlayground
-// Present the view controller in the Live View window
+
 var cfURL = Bundle.main.url(forResource: "Gilbert-Color", withExtension: "otf")! as CFURL
 CTFontManagerRegisterFontsForURL(cfURL, CTFontManagerScope.process, nil)
 cfURL = Bundle.main.url(forResource: "Gilbert-Bold", withExtension: "otf")! as CFURL
@@ -106,9 +106,19 @@ extension AchievementsViewController: UICollectionViewDelegate, UICollectionView
         let backButton = UIButton()
         backButton.contentMode = .scaleToFill
         backButton.frame = CGRect(x: 30, y: 30, width: 54, height: 42)
-        backButton.setImage(UIImage(imageLiteralResourceName: "back.png"), for: .normal)
+        backButton.setImage(UIImage(imageLiteralResourceName: "back"), for: .normal)
         backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
 
+        view.addSubview(orangeTab)
+        orangeTab.addSubview(logoBackground)
+        logoBackground.addSubview(label)
+        orangeTab.addSubview(backButton)
+        
+        createCollection()
+        CreateDetailView()
+        
+    }
+    func createCollection(){
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.headerReferenceSize = CGSize(width: self.view.frame.width, height: 100)
         let achievementCollection = UICollectionView(frame: CGRect(x: 100, y: 106, width: self.width - 200, height: self.height - 106), collectionViewLayout: flowLayout)
@@ -117,18 +127,15 @@ extension AchievementsViewController: UICollectionViewDelegate, UICollectionView
         achievementCollection.register(AchievementCollectionViewCell.self, forCellWithReuseIdentifier: "AchievementCell")
 
         achievementCollection.register(SupView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerCell")
+        achievementCollection.bounces = false
         
         achievementCollection.delegate = self
         achievementCollection.dataSource = self
         achievementCollection.reloadData()
-        view.addSubview(orangeTab)
-        orangeTab.addSubview(logoBackground)
-        logoBackground.addSubview(label)
-        orangeTab.addSubview(backButton)
+        
         view.addSubview(achievementCollection)
-        
-        
     }
+    
     public func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -142,6 +149,66 @@ extension AchievementsViewController: UICollectionViewDelegate, UICollectionView
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
         return sectionInsets
+    }
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let achievement = bank.getAchievement(indexPath.row)
+        if achievement.isCompleted(){
+            detailLabel.text = "Conquista desbloqueada!"
+        }
+        else{
+            detailLabel.text = "Conquista bloquada."
+        }
+        detailText.text = achievement.getText()
+        detailImage.image = achievement.getImage()
+        backDetailView.isHidden = false
+        
+    }
+    func CreateDetailView(){
+        backDetailView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        backDetailView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.6)
+        
+        let detailView = UIView(frame: CGRect(x: 264, y: 246, width: 496, height: 360))
+        detailView.layer.cornerRadius = 20
+        detailView.layer.masksToBounds = true
+        detailView.backgroundColor = .myLightGrey
+        
+        let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: detailView.frame.width, height: 53))
+        orangeTab.backgroundColor = .myOrange
+
+        
+        detailLabel.frame = CGRect(x: 78, y: 5, width: 340, height: 43)
+        detailLabel.font = UIFont(name: "Gilbert", size: 34)
+        detailLabel.textAlignment = .center
+        detailLabel.adjustsFontSizeToFitWidth = true
+        detailLabel.text = "Conquista desbloqueada!"
+        detailLabel.textColor = .myLightGrey
+        let cancelButton = UIButton()
+        cancelButton.contentMode = .scaleToFill
+        cancelButton.frame = CGRect(x: 12, y: 16, width: 17, height: 17)
+        cancelButton.setImage(UIImage(imageLiteralResourceName: "cancel"), for: .normal)
+        cancelButton.addTarget(self, action: #selector(closeDetail), for: .touchUpInside)
+        
+        detailImage.frame = CGRect(x: 195, y: 67, width: 141, height: 141)
+        detailImage.contentMode = .scaleAspectFit
+        
+        detailText.frame = CGRect(x: 42, y: 234, width: 412, height: 108)
+        detailText.font = UIFont(name: "Gilbert", size: 27)
+        detailText.textAlignment = .center
+        //detailText.adjustsFontSizeToFitWidth = true
+        detailText.textColor = .lightGray
+        detailText.numberOfLines = 3
+        
+        self.view.addSubview(backDetailView)
+        backDetailView.addSubview(detailView)
+        detailView.addSubview(orangeTab)
+        orangeTab.addSubview(detailLabel)
+        orangeTab.addSubview(cancelButton)
+        detailView.addSubview(detailImage)
+        detailView.addSubview(detailText)
+        closeDetail()
+    }
+    @objc func closeDetail(){
+        backDetailView.isHidden = true
     }
     
     public func collectionView(_ collectionView: UICollectionView,
