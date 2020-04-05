@@ -28,8 +28,8 @@ public class AchievementBank{
         get {achievements.count}
     }
     public init() {
-        achievements.append(Achievement(title: "a", text: "d", imageName: "mark"))
-        achievements.append(Achievement(title: "b", text: "e", imageName: "premio"))
+        achievements.append(Achievement(title: "a", text: "Realize sua primeira atividade de artesanato!", imageName: "mark"))
+        achievements.append(Achievement(title: "b", text: "Complete doze horas de atividades de culinária somente em Recife", imageName: "premio"))
         achievements.append(Achievement(title: "c", text: "f", imageName: "mark"))
         achievements.append(Achievement(title: "g", text: "k", imageName: "premio"))
         achievements.append(Achievement(title: "h", text: "l", imageName: "premio"))
