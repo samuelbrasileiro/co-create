@@ -15,19 +15,27 @@ let bank = AchievementBank()
 
 class City{
     var coordinates: CLLocationCoordinate2D
-    var region: MKCoordinateRegion
-    var startPoint:CLLocationCoordinate2D
+    
+    private var ctRegion: MKCoordinateRegion
+    public var region: MKCoordinateRegion{
+        return ctRegion
+    }
+    
+    private var ctStartPoint:CLLocationCoordinate2D
+    public var startPoint: CLLocationCoordinate2D{
+        return ctStartPoint
+    }
     init(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
         self.coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        region = MKCoordinateRegion(center: coordinates, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
-        startPoint = coordinates
+        ctRegion = MKCoordinateRegion(center: coordinates, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
+        ctStartPoint = coordinates
     }
     func setMapSize(latitudeInMeters: Double, longitudeInMeters: Double){
-        region = MKCoordinateRegion(
+        ctRegion = MKCoordinateRegion(
         center: coordinates, latitudinalMeters: latitudeInMeters, longitudinalMeters: longitudeInMeters)
     }
     func setStartPoint(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
-        startPoint = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        ctStartPoint = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     func getBoundary()->MKMapView.CameraBoundary{
         return MKMapView.CameraBoundary(coordinateRegion: region)!
@@ -38,6 +46,7 @@ class CityBank{
         get{
             let city = City(latitude: -8.0522, longitude: -34.9286)
             city.setMapSize(latitudeInMeters: 22000, longitudeInMeters: 22000)
+            city.setStartPoint(latitude: -8.062169, longitude: -34.877139)
             return city
         }
     }
@@ -56,6 +65,21 @@ class CityBank{
 
 }
 
+class menuOptions{
+    let text: String
+    let image: UIImage
+    let action: () -> Void
+    init(text: String, image: UIImage, action: @escaping () -> Void) {
+        self.text = text
+        self.image = image
+        self.action = action
+        
+    }
+    func performAction(){
+        action()
+    }
+}
+
 extension MapViewController{
     public override func viewDidLoad() {
         let recife = CityBank.recife
@@ -70,8 +94,7 @@ extension MapViewController{
         mapView.addAnnotation(annotation)
         mapView.setCameraZoomRange(MKMapView.CameraZoomRange(minCenterCoordinateDistance: 500, maxCenterCoordinateDistance: 60000), animated: true)
         mapView.cameraBoundary = recife.getBoundary()
-        mapView.centerCoordinate
-    
+        mapView.setCamera(MKMapCamera(lookingAtCenter: recife.startPoint, fromDistance: 2500, pitch: 50, heading: .leastNormalMagnitude), animated: true)
     }
 }
 
