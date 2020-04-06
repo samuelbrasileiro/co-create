@@ -6,10 +6,9 @@ import MapKit
 public class MapViewController : UIViewController,  MKMapViewDelegate, UITableViewDelegate, UITableViewDataSource{
 
     
-    let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
+    public let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
     
-    var mapRegion = MKCoordinateRegion()
-    var locationManager = CLLocationManager()
+    public var locationManager = CLLocationManager()
     
     let menuIcon = UIButton()
     let menuView = UIView()
@@ -80,20 +79,7 @@ public class MapViewController : UIViewController,  MKMapViewDelegate, UITableVi
         achievementButton.setImage(UIImage(imageLiteralResourceName: "premio"), for: .normal)
         achievementButton.addTarget(self, action: #selector(presentNext), for:.touchUpInside)
         
-        let recifeCoordinates = CLLocationCoordinate2DMake(-8.0522, -34.9286)
-
-        let mapRegionSpan = 0.02
-        mapRegion.center = recifeCoordinates
-        mapView.showsUserLocation = true
-        mapRegion.span.latitudeDelta = mapRegionSpan
-        mapRegion.span.longitudeDelta = mapRegionSpan
-
-        mapView.setRegion(mapRegion, animated: true)
-
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = recifeCoordinates
         
-        mapView.addAnnotation(annotation)
         
         createMenu()
         view.addSubview(orangeTab)
