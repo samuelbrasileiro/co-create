@@ -1,5 +1,5 @@
 //: A UIKit based Playground for presenting user interface
-  
+//TODO:- Criar classe de locais e de atividades. além disso, terminar a criação da table view de menu
 import UIKit
 import PlaygroundSupport
 import MapKit
@@ -65,7 +65,7 @@ class CityBank{
 
 }
 
-class menuOptions{
+class menuOption{
     let text: String
     let image: UIImage
     let action: () -> Void
@@ -80,6 +80,7 @@ class menuOptions{
     }
 }
 
+
 extension MapViewController{
     public override func viewDidLoad() {
         let recife = CityBank.recife
@@ -92,9 +93,9 @@ extension MapViewController{
         annotation.coordinate = recife.coordinates
         
         mapView.addAnnotation(annotation)
-        mapView.setCameraZoomRange(MKMapView.CameraZoomRange(minCenterCoordinateDistance: 500, maxCenterCoordinateDistance: 60000), animated: true)
+        mapView.setCameraZoomRange(MKMapView.CameraZoomRange(minCenterCoordinateDistance: 500, maxCenterCoordinateDistance: 30000), animated: true)
         mapView.cameraBoundary = recife.getBoundary()
-        mapView.setCamera(MKMapCamera(lookingAtCenter: recife.startPoint, fromDistance: 2500, pitch: 50, heading: .leastNormalMagnitude), animated: true)
+        mapView.setCamera(MKMapCamera(lookingAtCenter: recife.startPoint, fromDistance: 3000, pitch: 30, heading: .leastNormalMagnitude), animated: true)
     }
 }
 
