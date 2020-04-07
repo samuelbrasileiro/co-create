@@ -26,6 +26,7 @@ public class AchievementBank{
     var achievements: [Achievement] = []
     public var count: Int{
         get {achievements.count}
+        
     }
     public init() {
         achievements.append(Achievement(title: "a", text: "Realize sua primeira atividade de artesanato!", imageName: "mark"))

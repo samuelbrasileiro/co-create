@@ -185,6 +185,7 @@ extension AchievementsViewController: UICollectionViewDelegate, UICollectionView
     }
     @objc func closeDetail(){
         backDetailView.isHidden = true
+
     }
     @objc func goBack(){
         navigationController?.popViewController(animated: true)
