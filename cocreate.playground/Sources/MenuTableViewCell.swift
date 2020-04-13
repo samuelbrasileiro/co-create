@@ -11,6 +11,7 @@ public class MenuTableViewCell: UITableViewCell{
 
         self.addSubview(iconView)
         self.addSubview(titleLabel)
+        
     }
     
     

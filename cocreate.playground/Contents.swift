@@ -13,12 +13,12 @@ CTFontManagerRegisterFontsForURL(cfURL, CTFontManagerScope.process, nil)
 
 let bank = AchievementBank()
 
-class City{
-    var ctName: String
+public class City{
+    private var ctName: String
     public var name: String{
         return ctName
     }
-    var coordinates: CLLocationCoordinate2D
+    public var coordinates: CLLocationCoordinate2D
     
     private var ctRegion: MKCoordinateRegion
     public var region: MKCoordinateRegion{
@@ -35,18 +35,59 @@ class City{
         ctRegion = MKCoordinateRegion(center: coordinates, span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
         ctStartPoint = coordinates
     }
-    func setMapSize(latitudeInMeters: Double, longitudeInMeters: Double){
+    public func setMapSize(latitudeInMeters: Double, longitudeInMeters: Double){
         ctRegion = MKCoordinateRegion(
         center: coordinates, latitudinalMeters: latitudeInMeters, longitudinalMeters: longitudeInMeters)
     }
-    func setStartPoint(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
+    public func setStartPoint(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
         ctStartPoint = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
-    func getBoundary()->MKMapView.CameraBoundary{
+    public func getBoundary()->MKMapView.CameraBoundary{
         return MKMapView.CameraBoundary(coordinateRegion: region)!
     }
-}
     
+    public func withCoordinate(latitude: CLLocationDegrees, longitude: CLLocationDegrees) -> City{
+        coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        return self
+    }
+}
+
+public class Activity{
+    public var name: String
+    public var image: UIImage
+    public var description: String = ""
+    public var address: City
+    public var date: Date
+    init(name: String, address: City, imageName: String, date: Date){
+        self.name = name
+        self.address = address
+        self.image = UIImage(imageLiteralResourceName: imageName)
+        self.date = date
+    }
+    func addDescription(description: String){
+        self.description = description
+    }
+    
+}
+
+class Local{
+    var name: String
+    var image: UIImage
+    var activities: [Activity] = []
+    var description: String = ""
+    init(name: String, imageName: String){
+        self.name = name
+        self.image = UIImage(imageLiteralResourceName: imageName)
+        
+    }
+    func addDescription(description: String){
+        self.description = description
+    }
+    func addActivity(activity: Activity){
+        self.activities.append(activity)
+    }
+}
+
 extension City{
     static var recife: City{
         get{
@@ -101,11 +142,44 @@ public class MenuOption{
     
 }
 
-public class MapViewController : UIViewController, UITableViewDelegate, UITableViewDataSource{
+class LocalCollectionViewCell: UICollectionViewCell{
+    let photo = UIImageView()
+    let name = UILabel()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        photo.frame = CGRect(x: 20, y: 20, width: 100, height: 100)
+        photo.layer.masksToBounds = true
+        photo.layer.cornerRadius = photo.frame.width/2
+        
+        name.frame = CGRect(x: 20, y: 120, width: 100, height: 45)
+        name.font = UIFont(name: "Gilbert", size: 29)
+        name.textAlignment = .center
+        name.adjustsFontSizeToFitWidth = true
+        name.textColor = .lightGray
+        addSubview(photo)
+        addSubview(name)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
+}
+
+public class MapViewController : UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+    
+    
 
     public let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
     
     public var locationManager = CLLocationManager()
+    
+    public let width: CGFloat = 1024
+    public let height: CGFloat = 768
+    public var backView = UIView()
+    
+    public let sectionInsets = UIEdgeInsets(top:   100.0,   left: 30.0,
+                                             bottom:100.0,   right: 30.0)
+    public let itemsPerRow: CGFloat = 3
     
     let menuIcon = UIButton()
     let menuView = UIView()
@@ -118,14 +192,8 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
     
     let achievementButton = UIButton()
     override public func loadView() {
-        //navigationController?.navigationBar.isHidden = true
+
         self.view = UIView()
-        
-        //locationManager.delegate = self
-        
-//        let line = UIView(frame: CGRect(x: 400, y: 0, width: 1, height: 600))
-//        line.backgroundColor = .lightGray
-//        view.addSubview(line)
         
         let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: 1024, height: 106))
         orangeTab.backgroundColor = .myOrange
@@ -221,7 +289,7 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
     
     func createMenu(){
         menuOptions.append(MenuOption(text: "Acompanhe as atividades inscritas", image: UIImage(imageLiteralResourceName: "premio"), action: openMenu))
-        menuOptions.append(MenuOption(text: "Descubra as atividades de recife", image: UIImage(imageLiteralResourceName: "mark"), action: openMenu))
+        menuOptions.append(MenuOption(text: "Descubra as atividades de recife", image: UIImage(imageLiteralResourceName: "mark"), action: createLocalsView))
         menuOptions.append(MenuOption(text: "Conheça os moradores locais", image: UIImage(imageLiteralResourceName: "premio"), action: openMenu))
         menuOptions.append(MenuOption(text: "Encerrar viagem", image: UIImage(imageLiteralResourceName: "cancel"), action: openMenu))
         
@@ -245,6 +313,93 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
         menuTableView.frame = CGRect(x: 0, y: 107, width: 0, height: self.menuView.frame.height - 107)
     }
     
+    public func createLocalsView(){
+        openMenu()
+        backView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        backView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.6)
+        
+        let mainView = UIView(frame: CGRect(x: 164, y: 146, width: 696, height: 560))
+        mainView.layer.cornerRadius = 20
+        mainView.layer.masksToBounds = true
+        mainView.backgroundColor = .myLightGrey
+        let orangeTab = UIView(frame: CGRect(x: 0, y: 0, width: mainView.frame.width, height: 53))
+        orangeTab.backgroundColor = .myOrange
+
+        let label = UILabel(frame: CGRect(x: orangeTab.frame.width/2 - 170, y: 5, width: 340, height: 43))
+        label.font = UIFont(name: "Gilbert", size: 34)
+        label.textAlignment = .center
+        label.adjustsFontSizeToFitWidth = true
+        label.text = "Moradores locais"
+        label.textColor = .myLightGrey
+        
+        let cancelButton = UIButton()
+        cancelButton.contentMode = .scaleToFill
+        cancelButton.frame = CGRect(x: 12, y: 16, width: 17, height: 17)
+        cancelButton.setImage(UIImage(imageLiteralResourceName: "cancel"), for: .normal)
+
+        cancelButton.addTarget(self, action: #selector(removeDetail), for: .touchUpInside)
+        
+        let flowLayout = UICollectionViewFlowLayout()
+        
+        let localCollection = UICollectionView(frame: CGRect(x: 0, y: 43, width: mainView.frame.width, height: mainView.frame.height - 43), collectionViewLayout: flowLayout)
+        localCollection.register(LocalCollectionViewCell.self, forCellWithReuseIdentifier: "localCell")
+        
+        
+        localCollection.backgroundColor = .clear
+
+        localCollection.bounces = true
+        
+        localCollection.delegate = self
+        localCollection.dataSource = self
+        localCollection.reloadData()
+        
+        view.addSubview(backView)
+        backView.addSubview(mainView)
+        mainView.addSubview(orangeTab)
+        orangeTab.addSubview(label)
+        orangeTab.addSubview(cancelButton)
+        mainView.addSubview(localCollection)
+        
+    }
+    @objc func removeDetail(){
+        vc.view.removeFromSuperview()
+        vc.dismiss(animated: true, completion: nil)
+    }
+    //MARK:- COLLECTION VIEW FUNCTIONS
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 8
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "localCell", for: indexPath) as? LocalCollectionViewCell else{
+            fatalError("Não foi possivel instanciar uma LocalCollectionViewCell")
+        }
+        let local = Local(name: "Fatinha", imageName: "fatinha")
+        cell.photo.image = local.image
+        cell.name.text = local.name
+        return cell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
+        let availableWidth = collectionView.frame.width - paddingSpace
+        let widthPerItem = availableWidth / itemsPerRow
+
+        return CGSize(width: widthPerItem, height: widthPerItem)
+    }
+    public func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
+        return sectionInsets
+    }
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        
+    }
+    
+    //MARK:- TABLEVIEW FUNCTIONS
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return menuOptions.count
     }
@@ -280,6 +435,7 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
 }
 extension MenuTableViewCell{
     public func set(){
+        
         let half = self.frame.height / 2
         iconView.frame = CGRect(x: 10, y: half - 20, width: 40, height: 40)
         iconView.layer.masksToBounds = true
@@ -289,6 +445,7 @@ extension MenuTableViewCell{
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.textColor = .myLightGrey
         titleLabel.numberOfLines = 2
+        
     }
 }
 
@@ -335,21 +492,21 @@ extension MapViewController: MKMapViewDelegate{
         }
         
         annotationView?.contentMode = .scaleToFill
-        annotationView?.image = UIImage(imageLiteralResourceName: "mark@3x")
+        annotationView?.image = UIImage(imageLiteralResourceName: "mark@3x").withHorizontallyFlippedOrientation()
+        
         annotationView?.frame.size = CGSize(width: 132, height: 90)
     
         annotationView?.canShowCallout = false
         return annotationView
     }
     public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        print(view.frame)
         UIView.animate(withDuration: 0.2, delay: 0, options: [], animations: {
             
             if view.frame.width == 132{
-                view.frame = CGRect(x: view.frame.origin.x - 60, y: view.frame.origin.y - 40, width: view.frame.width + 60, height: view.frame.height + 40)
+                view.frame = CGRect(x: view.frame.origin.x, y: view.frame.origin.y, width: view.frame.width + 60, height: view.frame.height + 40)
             }
             else{
-                view.frame = CGRect(x: view.frame.origin.x + 60, y: view.frame.origin.y + 40, width: view.frame.width - 60, height: view.frame.height - 40)
+                view.frame = CGRect(x: view.frame.origin.x, y: view.frame.origin.y, width: view.frame.width - 60, height: view.frame.height - 40)
             }
         })
     }
