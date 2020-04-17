@@ -57,12 +57,10 @@ public class Activity{
     public var image: UIImage
     public var description: String = ""
     public var address: City
-    public var date: Date
-    init(name: String, address: City, imageName: String, date: Date){
+    init(name: String, address: City, imageName: String){
         self.name = name
         self.address = address
         self.image = UIImage(imageLiteralResourceName: imageName)
-        self.date = date
     }
     func addDescription(description: String){
         self.description = description
@@ -112,6 +110,18 @@ extension City{
 
 }
 
+class localsBank{
+    var locals: [Local] = []
+    init(){
+        var local = Local(name: "Fatinha", imageName: "fatinha")
+        local.addActivity(activity: Activity(name: "Bolo de rolo artesanal", address: City.recife.withCoordinate(latitude: -8.0561369, longitude: -34.877661), imageName: "cookhat"))
+        local.addActivity(activity: Activity(name: "Capoeira recifence", address: City.recife.withCoordinate(latitude: -8.0657236, longitude: -34.872713), imageName: "capo"))
+        locals.append(local)
+        local = Local(name: "Januário", imageName: "samba")
+        local.addActivity(activity: Activity(name: "Confecção de bonecos de barro", address: City.recife.withCoordinate(latitude: -8.0574190, longitude: -34.8715867), imageName: "samba"))
+        locals.append(local)
+    }
+}
 
 class LocationSearchTable : UITableViewController, UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
@@ -147,11 +157,10 @@ class LocalCollectionViewCell: UICollectionViewCell{
     let name = UILabel()
     override init(frame: CGRect) {
         super.init(frame: frame)
-        photo.frame = CGRect(x: 20, y: 20, width: 100, height: 100)
+        photo.frame = CGRect(x: 60, y: 20, width: 100, height: 100)
         photo.layer.masksToBounds = true
         photo.layer.cornerRadius = photo.frame.width/2
-        
-        name.frame = CGRect(x: 20, y: 120, width: 100, height: 45)
+        name.frame = CGRect(x: 60, y: 120, width: 100, height: 45)
         name.font = UIFont(name: "Gilbert", size: 29)
         name.textAlignment = .center
         name.adjustsFontSizeToFitWidth = true
@@ -167,7 +176,7 @@ class LocalCollectionViewCell: UICollectionViewCell{
 
 public class MapViewController : UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
-    
+    let bank = localsBank()
 
     public let mapView = MKMapView(frame: CGRect(x:0, y: 106, width: 1024, height:556))
     
@@ -187,7 +196,7 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
     let cityLabel = UILabel()
     var menuOptions: [MenuOption] = []
     let progressBar = CircleProgressView()
-    
+    var localCollection: UICollectionView?
     let progressName = UILabel()
     
     let achievementButton = UIButton()
@@ -231,7 +240,7 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
         progressBar.trackBackgroundColor = .clear
         progressBar.trackWidth = 8
         progressBar.trackFillColor = .myLightBlue
-        
+        cityLabel.addGestureRecognizer(UIGestureRecognizer(target: self, action: #selector(progress(_:))))
         let number = UILabel(frame: CGRect(x: 13, y: 10, width: 49, height: 52))
         number.font = UIFont(name: "Gilbert Color", size: 55)
         number.textAlignment = .center
@@ -258,6 +267,10 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
         progressBar.addSubview(number)
         belowTab.addSubview(achievementButton)
         view.addSubview(menuView)
+    }
+    @objc func progress(_ gestureRecognizer: UITapGestureRecognizer){
+        print("a")
+        progressBar.setProgress(0.9, animated: true)
     }
     @objc func presentNext(){
         let vc = AchievementsViewController(screenType: .ipad)
@@ -289,8 +302,8 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
     
     func createMenu(){
         menuOptions.append(MenuOption(text: "Acompanhe as atividades inscritas", image: UIImage(imageLiteralResourceName: "premio"), action: openMenu))
-        menuOptions.append(MenuOption(text: "Descubra as atividades de recife", image: UIImage(imageLiteralResourceName: "mark"), action: createLocalsView))
-        menuOptions.append(MenuOption(text: "Conheça os moradores locais", image: UIImage(imageLiteralResourceName: "premio"), action: openMenu))
+        menuOptions.append(MenuOption(text: "Descubra as atividades de recife", image: UIImage(imageLiteralResourceName: "mark"), action: openMenu))
+        menuOptions.append(MenuOption(text: "Conheça os moradores locais", image: UIImage(imageLiteralResourceName: "premio"), action: createLocalsView))
         menuOptions.append(MenuOption(text: "Encerrar viagem", image: UIImage(imageLiteralResourceName: "cancel"), action: openMenu))
         
         menuIcon.contentMode = .scaleToFill
@@ -313,7 +326,7 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
         menuTableView.frame = CGRect(x: 0, y: 107, width: 0, height: self.menuView.frame.height - 107)
     }
     
-    public func createLocalsView(){
+    public func createOptionView(){
         openMenu()
         backView.frame = CGRect(x: 0, y: 0, width: width, height: height)
         backView.backgroundColor = UIColor.lightGray.withAlphaComponent(0.6)
@@ -338,65 +351,103 @@ public class MapViewController : UIViewController, UITableViewDelegate, UITableV
         cancelButton.setImage(UIImage(imageLiteralResourceName: "cancel"), for: .normal)
 
         cancelButton.addTarget(self, action: #selector(removeDetail), for: .touchUpInside)
-        
-        let flowLayout = UICollectionViewFlowLayout()
-        
-        let localCollection = UICollectionView(frame: CGRect(x: 0, y: 43, width: mainView.frame.width, height: mainView.frame.height - 43), collectionViewLayout: flowLayout)
-        localCollection.register(LocalCollectionViewCell.self, forCellWithReuseIdentifier: "localCell")
-        
-        
-        localCollection.backgroundColor = .clear
-
-        localCollection.bounces = true
-        
-        localCollection.delegate = self
-        localCollection.dataSource = self
-        localCollection.reloadData()
-        
         view.addSubview(backView)
         backView.addSubview(mainView)
         mainView.addSubview(orangeTab)
         orangeTab.addSubview(label)
         orangeTab.addSubview(cancelButton)
-        mainView.addSubview(localCollection)
+    }
+
+    func createLocalsView(){
+        createOptionView()
+        let flowLayout = UICollectionViewFlowLayout()
+        
+        let mainView = backView.subviews[0]
+        let orangeTab = mainView.subviews[0]
+        guard let label = orangeTab.subviews[0] as? UILabel else{fatalError()}
+        localCollection = UICollectionView(frame: CGRect(x: 0, y: 53, width: mainView.frame.width, height: mainView.frame.height - 53), collectionViewLayout: flowLayout)
+        localCollection?.register(LocalCollectionViewCell.self, forCellWithReuseIdentifier: "localCell")
+        
+        label.text = "Moradores locais"
+        localCollection?.backgroundColor = .clear
+
+        localCollection?.bounces = true
+        
+        localCollection?.delegate = self
+        localCollection?.dataSource = self
+        localCollection?.reloadData()
+        
+        
+        mainView.addSubview(localCollection!)
         
     }
     @objc func removeDetail(){
-        vc.view.removeFromSuperview()
-        vc.dismiss(animated: true, completion: nil)
+        backView.removeFromSuperview()
+        
     }
     //MARK:- COLLECTION VIEW FUNCTIONS
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 8
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "localCell", for: indexPath) as? LocalCollectionViewCell else{
-            fatalError("Não foi possivel instanciar uma LocalCollectionViewCell")
+        if collectionView == localCollection{
+            return bank.locals.count * 2
         }
-        let local = Local(name: "Fatinha", imageName: "fatinha")
-        cell.photo.image = local.image
-        cell.name.text = local.name
-        return cell
+        else{
+            
+        }
+        return 0
+    }
+
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if collectionView == localCollection{
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "localCell", for: indexPath) as? LocalCollectionViewCell else{
+                fatalError("Não foi possivel instanciar uma LocalCollectionViewCell")
+            }
+            let local = bank.locals[indexPath.row % 2]
+            cell.photo.image = local.image
+            cell.name.text = local.name
+            return cell
+        }
+        else{
+            
+        }
+        return UICollectionViewCell()
     }
     
     public func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if collectionView == localCollection{
+
         let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
         let availableWidth = collectionView.frame.width - paddingSpace
         let widthPerItem = availableWidth / itemsPerRow
 
         return CGSize(width: widthPerItem, height: widthPerItem)
+        }
+        else{
+            
+        }
+        return CGSize.zero
     }
     public func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
+        if collectionView == localCollection{
+
         return sectionInsets
+        }
+        else{
+            
+        }
+        return UIEdgeInsets.zero
     }
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        
+        if collectionView == localCollection{
+
+        print("elaine")
+        }
+        else{
+            
+        }
     }
     
     //MARK:- TABLEVIEW FUNCTIONS
@@ -460,31 +511,24 @@ extension MapViewController: MKMapViewDelegate{
         mapView.showsUserLocation = true
         
         mapView.setRegion(recife.region, animated: true)
-
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = recife.coordinates
         
-        mapView.addAnnotation(annotation)
+        for local in bank.locals{
+            
+            for activity in local.activities{
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = activity.address.coordinates
+                mapView.addAnnotation(annotation)
+            }
+        }
         mapView.setCameraZoomRange(MKMapView.CameraZoomRange(minCenterCoordinateDistance: 500, maxCenterCoordinateDistance: 30000), animated: true)
         mapView.cameraBoundary = recife.getBoundary()
         mapView.setCamera(MKMapCamera(lookingAtCenter: recife.startPoint, fromDistance: 3000, pitch: 30, heading: .leastNormalMagnitude), animated: true)
         
         
-        //APAGAR ISSO DPS
-        let gestureRecognizer = UITapGestureRecognizer(target: self, action:#selector(mapTap(_:)))
-        mapView.addGestureRecognizer(gestureRecognizer)
+        
         
     }
-    @objc func mapTap(_ gestureRecognizer: UITapGestureRecognizer) {
 
-        let location = gestureRecognizer.location(in: mapView)
-        let coordinate = mapView.convert(location, toCoordinateFrom: mapView)
-
-        // Add annotation:
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = coordinate
-        mapView.addAnnotation(annotation)
-    }
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?{
         var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "AnnotationView")
         if annotationView == nil{
@@ -493,6 +537,15 @@ extension MapViewController: MKMapViewDelegate{
         
         annotationView?.contentMode = .scaleToFill
         annotationView?.image = UIImage(imageLiteralResourceName: "mark@3x").withHorizontallyFlippedOrientation()
+        for local in bank.locals{
+            for activity in local.activities{
+                if annotation.coordinate.latitude == activity.address.coordinates.latitude{
+                    let imagev = UIImageView(image: activity.image)
+                    
+                    annotationView?.addSubview(imagev)
+                }
+            }
+        }
         
         annotationView?.frame.size = CGSize(width: 132, height: 90)
     
@@ -500,15 +553,18 @@ extension MapViewController: MKMapViewDelegate{
         return annotationView
     }
     public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        UIView.animate(withDuration: 0.2, delay: 0, options: [], animations: {
-            
-            if view.frame.width == 132{
-                view.frame = CGRect(x: view.frame.origin.x, y: view.frame.origin.y, width: view.frame.width + 60, height: view.frame.height + 40)
+        for local in bank.locals{
+            for activity in local.activities{
+                for sub in view.subviews{
+                    if let sub = sub as? UIImageView{
+                        
+                        if sub.image == activity.image{
+                            print(local.name)
+                        }
+                    }
+                }
             }
-            else{
-                view.frame = CGRect(x: view.frame.origin.x, y: view.frame.origin.y, width: view.frame.width - 60, height: view.frame.height - 40)
-            }
-        })
+        }
     }
 }
 
